@@ -16,6 +16,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import ws1718_a4.assets.Assets;
+import ws1718_a4.basis.Konstanten;
 import ws1718_a4.basis.Konstanten.Befehl;
 import ws1718_a4.basis.Konstanten.SpielStatus;
 import ws1718_a4.basis.Level;
@@ -25,14 +26,15 @@ import ws1718_a4.basis.SpielZustand;
 import ws1718_a4.controller.Controller;
 import ws1718_a4.darstellung.SpielfeldRenderer;
 
-public class Disp extends Application implements Neuzeichnen {
-	private static Neuzeichnen nz;
+public class Disp extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
 		stage.setTitle("PMP2 Spiel");
-		Pane root = new GridPane();
-		Scene scene = new Scene(root, 500, 300);
+		Pane mainpan = new GridPane();
+		Pane left = new GridPane();
+		GridPane.setConstraints(left, 0, 0);
+		Scene scene = new Scene(mainpan, Konstanten.FENSTER_BREITE, Konstanten.FENSTER_HOEHE);
 		
 		Insets small = new Insets(5,5,5,5);
 		Insets big = new Insets(10,10,10,10);
@@ -80,7 +82,20 @@ public class Disp extends Application implements Neuzeichnen {
 		Label output = new Label();
 		GridPane.setConstraints(output, 0, 4);
 		
-		root.getChildren().addAll(restart, labelgrid, input, buttongrid);
+		//Game
+		Level level = LevelIO
+			.levelLaden(Assets.class.getResourceAsStream("level01.json"));
+		SpielZustand.getInstance().setAktuellerLevel(level);
+		SpielZustand.getInstance().setSpielStatus(SpielStatus.SPIELER_ZUG);
+		
+		SpielfeldRenderer render = new SpielfeldRenderer();
+		GridPane.setConstraints(render, 1, 0);
+		GridPane.setMargin(render, big);
+		render.neuzeichnen();
+		
+		//Create hierarchy
+		left.getChildren().addAll(restart, labelgrid, input, buttongrid);
+		mainpan.getChildren().addAll(left, render);		
 		
 		stage.setScene(scene);
 		stage.show();
@@ -95,19 +110,7 @@ public class Disp extends Application implements Neuzeichnen {
 	}
 	
 	public static void main(String[] args) {
-		Level level = LevelIO
-			.levelLaden(Assets.class.getResourceAsStream("level01.json"));
-		SpielZustand.getInstance().setAktuellerLevel(level);
-		SpielZustand.getInstance().setSpielStatus(SpielStatus.SPIELER_ZUG);
-		SpielfeldRenderer render = new SpielfeldRenderer();
-		Controller controller = new Controller(nz);
 		launch(args);
-	}
-
-	@Override
-	public void neuzeichnen() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }
